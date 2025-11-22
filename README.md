@@ -1,12 +1,22 @@
 # Power Monitor
 
+效果如下
+
+<img src="./screenshot/Screenshot_20251122-215534.png" width="30%" />
+
 ## 配置指南
 
-1. 在 **Settings → Secrets and variables → Actions** 中添加：
-   - `POWER_MONITOR_MID`
-2. 新建一个 Issue 用于接收提醒，例如标题“Power Monitor 日报”。
-3. 在同一页面的 **Repository variables** 里添加变量
-   `POWER_MONITOR_NOTIFY_ISSUE`，填写 Issue 的编号。
+fork本项目，用浏览器打开交电费的网站，复制后面的MID
+
+![](./screenshot/step1.png)
+
+1. 在 **Settings → Secrets and variables → Actions** 中的 `Secrets` 添加
+   `Repository secrets`：
+   - `POWER_MONITOR_MID` 填刚才复制的 MID
+2. 新建一个 Issue 用于接收提醒，例如标题“电费统计”
+3. 在 **Settings → Secrets and variables → Actions** 中添加
+   `Repository secrets`： `POWER_MONITOR_NOTIFY_ISSUE`，填写 Issue
+   的编号（一般第一个issue就是，所以写1就行）
 
 每天将在八点执行。
 
