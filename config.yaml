@@ -1,0 +1,3 @@
+meter:
+  mid: "${POWER_MONITOR_MID}"
+  base_url: "${POWER_MONITOR_BASE_URL}"

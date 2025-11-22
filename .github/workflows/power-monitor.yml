@@ -1,0 +1,48 @@
+name: Power Monitor
+on:
+  schedule:
+    # Runs every day at 00:00 UTC (08:00 in China Standard Time).
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install --disable-pip-version-check --no-cache-dir -r requirements.txt
+      - name: Generate power report
+        env:
+          POWER_MONITOR_URL: ${{ secrets.POWER_MONITOR_URL }}
+          POWER_MONITOR_MID: ${{ secrets.POWER_MONITOR_MID }}
+          POWER_MONITOR_BASE_URL: ${{ secrets.POWER_MONITOR_BASE_URL }}
+        run: python scripts/check_power.py --format markdown --output report.md
+      - name: Attach report to job summary
+        run: cat report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Post report to tracking issue
+        if: ${{ vars.POWER_MONITOR_NOTIFY_ISSUE != '' }}
+        uses: actions/github-script@v7
+        env:
+          ISSUE_NUMBER: ${{ vars.POWER_MONITOR_NOTIFY_ISSUE }}
+        with:
+          script: |
+            const fs = require("fs");
+            const issueNumber = parseInt(process.env.ISSUE_NUMBER, 10);
+            if (!issueNumber) {
+              core.setFailed("POWER_MONITOR_NOTIFY_ISSUE must be a valid issue number");
+            }
+            const body = fs.readFileSync("report.md", "utf8");
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body,
+            });
